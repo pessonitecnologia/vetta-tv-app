@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vetta TV · Launcher</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
+<style>
+  :root{
+    --bg:#141110;--bg2:#1b1614;--panel:#221c19;--panel2:#2b2320;
+    --line:#3a2f28;--ink:#f4ede2;--muted:#a89b8c;--faint:#6f6459;
+    --brass:#d3ae63;--brass-dim:#9c7f45;--live:#e0563f;--radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#000}
+  body{
+    color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow:hidden;height:100vh;
+    user-select:none;-webkit-user-select:none;cursor:none;
+  }
+  .accent{color:var(--brass)}
+
+  /* ---------- Home ---------- */
+  #home{
+    height:100vh;overflow:hidden;position:relative;display:flex;flex-direction:column;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #2a211c 0%, rgba(42,33,28,0) 55%),
+      radial-gradient(90% 70% at 85% 0%, rgba(211,174,99,0.10) 0%, rgba(211,174,99,0) 40%),
+      linear-gradient(180deg,#17120f 0%, var(--bg) 30%, #100d0c 100%);
+  }
+  .screen{padding:clamp(22px,3vw,44px) clamp(26px,4vw,64px) 0;display:flex;flex-direction:column;gap:clamp(20px,2.6vw,34px);flex:1;min-height:0}
+
+  .status{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+  .brand{display:flex;align-items:center;gap:16px}
+  .crest{width:56px;height:56px;flex:none;border-radius:12px;display:grid;place-items:center;
+    background:linear-gradient(160deg,#241d18,#17120f);border:1px solid var(--line)}
+  .crest span{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:26px;color:var(--brass)}
+  .wordmark{display:flex;flex-direction:column;line-height:1.05}
+  .wordmark .name{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:clamp(22px,2.4vw,30px);letter-spacing:.5px}
+  .wordmark .kicker{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--brass-dim);margin-top:4px}
+  .meta{text-align:right;display:flex;align-items:center;gap:clamp(16px,2.4vw,32px)}
+  .clock .time{font-size:clamp(28px,3.4vw,44px);font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1}
+  .clock .date{color:var(--muted);font-size:13px;margin-top:6px;text-transform:capitalize}
+  .room{padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02);text-align:left}
+  .room .lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--faint)}
+  .room .val{font-size:20px;font-variant-numeric:tabular-nums;margin-top:3px}
+
+  .hero{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--line);
+    background:radial-gradient(90% 140% at 85% 10%, rgba(211,174,99,0.16), rgba(211,174,99,0) 55%),linear-gradient(105deg,#241c17,#1a1512 60%,#14100e);
+    padding:clamp(22px,3vw,40px);display:flex;align-items:center;justify-content:space-between;gap:28px}
+  .hero .greet{max-width:60ch}
+  .hero .eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--brass)}
+  .hero h1{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-weight:600;font-size:clamp(26px,3.6vw,46px);line-height:1.05;margin:10px 0 8px;text-wrap:balance}
+  .hero p{color:var(--muted);font-size:clamp(13px,1.2vw,16px);margin:0;max-width:46ch}
+  .cta{flex:none;display:inline-flex;align-items:center;gap:12px;padding:16px 26px;border-radius:999px;
+    background:linear-gradient(180deg,var(--brass),var(--brass-dim));color:#1a130a;font-weight:700;font-size:16px;white-space:nowrap;border:none}
+  .cta .play{width:26px;height:26px;border-radius:50%;background:#1a130a;color:var(--brass);display:grid;place-items:center;font-size:12px}
+
+  .rails{display:flex;flex-direction:column;gap:clamp(16px,2vw,26px);overflow-y:auto;padding-bottom:30px;flex:1;min-height:0;scrollbar-width:none}
+  .rails::-webkit-scrollbar{display:none}
+  .rail{display:flex;flex-direction:column;gap:12px}
+  .rail-head{display:flex;align-items:baseline;gap:12px}
+  .rail-head h2{font-size:clamp(16px,1.5vw,20px);font-weight:600;margin:0}
+  .rail-head .note{font-size:12px;color:var(--faint)}
+  .track{display:grid;grid-auto-flow:column;gap:18px;overflow-x:auto;padding:8px 4px 12px;margin:-8px -4px -12px;scrollbar-width:none;scroll-behavior:smooth}
+  .track::-webkit-scrollbar{display:none}
+
+  .tile{position:relative;text-align:left;background:var(--panel);border:1px solid var(--line);color:inherit;
+    border-radius:var(--radius);padding:0;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;font:inherit}
+  .tile:focus{outline:none}
+  .tile.is-focused{transform:translateY(-4px) scale(1.05);border-color:var(--brass);box-shadow:0 0 0 2px var(--brass),0 18px 40px rgba(0,0,0,.5);z-index:3}
+
+  .track--ch .tile{width:176px}
+  .ch-art{height:100px;display:grid;place-items:center;position:relative;background:linear-gradient(150deg,var(--c1),var(--c2))}
+  .ch-logo-img{max-width:80%;max-height:64px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+  .ch-logo{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-weight:700;font-size:30px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .live-badge{position:absolute;top:8px;left:8px;display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.42);padding:3px 8px;border-radius:6px;font-size:10px;letter-spacing:1.5px;font-weight:700}
+  .live-badge i{width:6px;height:6px;border-radius:50%;background:var(--live);box-shadow:0 0 8px var(--live)}
+  .ch-meta{padding:10px 12px 12px}
+  .ch-meta .num{font-size:10px;letter-spacing:1px;color:var(--brass-dim);font-variant-numeric:tabular-nums}
+  .ch-meta .cname{font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .track--svc .tile{width:184px}
+  .svc-inner{padding:18px;display:flex;flex-direction:column;gap:12px;height:132px;justify-content:space-between}
+  .svc-ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:rgba(211,174,99,.12);color:var(--brass);font-size:20px}
+  .svc-t{font-size:16px}
+  .svc-s{font-size:12px;color:var(--muted);margin-top:3px}
+
+  /* ---------- Loading / error ---------- */
+  .curtain{position:fixed;inset:0;z-index:80;display:grid;place-items:center;text-align:center;
+    background:linear-gradient(180deg,#17120f,#100d0c);padding:30px}
+  .curtain.hide{display:none}
+  .curtain .crest{width:70px;height:70px;margin:0 auto 20px}
+  .curtain .crest span{font-size:34px}
+  .spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--brass);animation:sp 1s linear infinite;margin:18px auto 0}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .curtain h2{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:26px;margin:6px 0}
+  .curtain p{color:var(--muted);max-width:44ch;margin:6px auto 0}
+  .curtain .btn{margin-top:20px;display:inline-flex;gap:8px;padding:12px 22px;border-radius:999px;background:linear-gradient(180deg,var(--brass),var(--brass-dim));color:#1a130a;font-weight:700;border:none;font:inherit;cursor:pointer}
+
+  /* ---------- Player ---------- */
+  #player{position:fixed;inset:0;z-index:70;background:#000;display:none}
+  #player.on{display:block}
+  #video{width:100%;height:100%;object-fit:contain;background:#000}
+  .p-status{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--muted);pointer-events:none}
+  .p-status.hide{display:none}
+  .infobar{position:absolute;left:0;right:0;bottom:0;padding:28px clamp(26px,4vw,60px) 34px;
+    background:linear-gradient(0deg,rgba(0,0,0,.82) 0%,rgba(0,0,0,0) 100%);
+    display:flex;align-items:flex-end;justify-content:space-between;gap:24px;transition:opacity .3s;pointer-events:none}
+  .infobar.hide{opacity:0}
+  .ib-left{display:flex;align-items:center;gap:20px}
+  .ib-num{font-size:clamp(30px,4vw,52px);font-weight:800;font-variant-numeric:tabular-nums;color:var(--brass);line-height:1}
+  .ib-name{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:clamp(22px,2.6vw,34px)}
+  .ib-grp{font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+  .ib-live{display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:2px;font-weight:700;margin-left:14px}
+  .ib-live i{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 10px var(--live)}
+  .ib-hint{color:var(--faint);font-size:13px;text-align:right}
+  .tuning{position:absolute;top:34px;right:clamp(26px,4vw,60px);font-size:clamp(40px,6vw,80px);font-weight:800;
+    color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.7);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .15s}
+  .tuning.on{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- Loading / error curtain -->
+<div class="curtain" id="curtain">
+  <div>
+    <div class="crest"><span id="curtainInitial">V</span></div>
+    <div id="curtainBody">
+      <div class="spin"></div>
+      <h2>Carregando…</h2>
+      <p>Conectando à sua TV.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Home -->
+<div id="home" style="visibility:hidden">
+  <div class="screen">
+    <header class="status">
+      <div class="brand">
+        <div class="crest"><span id="crestTxt">V</span></div>
+        <div class="wordmark"><div class="name" id="hotelName">—</div><div class="kicker" id="hotelCity">—</div></div>
+      </div>
+      <div class="meta">
+        <div class="room" id="roomBox" style="display:none"><div class="lbl">Apartamento</div><div class="val" id="roomVal">—</div></div>
+        <div class="clock"><div class="time" id="clock">--:--</div><div class="date" id="date">—</div></div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="greet">
+        <div class="eyebrow" id="heroEyebrow">Bem-vindo(a)</div>
+        <h1 id="heroTitle">Sua estadia, do seu jeito.</h1>
+        <p>TV ao vivo e os serviços do hotel, tudo aqui. Use o controle para navegar — <span class="accent">OK</span> abre o canal.</p>
+      </div>
+      <button class="cta tile" id="heroCta"><span class="play">▶</span> Assistir TV</button>
+    </section>
+
+    <div class="rails" id="rails"><!-- rails injetados --></div>
+  </div>
+</div>
+
+<!-- Player -->
+<div id="player">
+  <video id="video" playsinline></video>
+  <div class="p-status" id="pStatus"><div><div class="spin"></div><div style="margin-top:12px">Sintonizando…</div></div></div>
+  <div class="tuning" id="tuning"></div>
+  <div class="infobar" id="infobar">
+    <div class="ib-left">
+      <div class="ib-num" id="ibNum">—</div>
+      <div><div class="ib-name" id="ibName">—</div><div class="ib-grp" id="ibGrp"></div></div>
+      <span class="ib-live"><i></i>AO VIVO</span>
+    </div>
+    <div class="ib-hint">▲▼ trocar canal · dígitos sintonizam · <b>Voltar</b> sai</div>
+  </div>
+</div>
+
+<script>
+/* ================= Config ================= */
+const EDGE="https://ncwzkksjwjiikrkfuhqw.supabase.co/functions/v1/tv-canais";
+const params=new URLSearchParams(location.search);
+const DEVICE=params.get("device");
+const HOTEL=params.get("hotel")|| (DEVICE?null:"cr-hotel-bueno"); // demo se abrir sem parâmetro
+const SERVICES=[
+  {ic:"🍽",t:"Room Service",s:"Cardápio 24h"},
+  {ic:"📶",t:"Wi-Fi",s:"Senha e conexão"},
+  {ic:"☕",t:"Café da manhã",s:"06:30 – 10:00"},
+  {ic:"🛎",t:"Recepção",s:"Falar agora"},
+  {ic:"🧾",t:"Minha conta",s:"Consumo e checkout"},
+  {ic:"🏛",t:"Sobre o hotel",s:"Conheça"}
+];
+const PAL=[["#3b4d7a","#1f2942"],["#7a3b3b","#42201f"],["#2f6d5b","#173229"],["#6d5a2f","#322a17"],["#5a2f6d","#2a1732"],["#2f5a6d","#173029"],["#6d452f","#321f17"],["#40406d","#1f1f32"],["#2f6d45","#17321f"]];
+const $=id=>document.getElementById(id);
+
+let canais=[], hotel=null;
+let nav={rails:[], r:0, c:0};       // navegação D-pad na home
+let curIdx=-1;                       // canal atual no player
+let hls=null, infoTimer=null, tuneBuf="", tuneTimer=null;
+
+/* ================= Carregar grade ================= */
+async function loadGrade(){
+  showCurtain("loading");
+  const url=DEVICE?`${EDGE}?device=${encodeURIComponent(DEVICE)}`:`${EDGE}?hotel=${encodeURIComponent(HOTEL)}`;
+  try{
+    const r=await fetch(url,{cache:"no-store"});
+    const data=await r.json();
+    if(!r.ok||data.error) return showCurtain("error", data.error||`Erro ${r.status}`);
+    hotel=data.hotel; canais=data.canais||[];
+    renderHome();
+    hideCurtain();
+  }catch(e){ showCurtain("error","Sem conexão com o servidor."); }
+}
+
+/* ================= Home ================= */
+function renderHome(){
+  const b=hotel.branding||{};
+  const initial=(hotel.nome||"V").trim()[0].toUpperCase();
+  $("crestTxt").textContent=initial; $("curtainInitial").textContent=initial;
+  $("hotelName").textContent=hotel.nome||"Vetta TV";
+  $("hotelCity").textContent=hotel.cidade||"";
+  $("heroTitle").textContent=b.boasVindas||"Sua estadia, do seu jeito.";
+  if(b.cor){document.documentElement.style.setProperty("--brass", b.cor);}
+  if(hotel.quarto){$("roomBox").style.display="";$("roomVal").textContent=hotel.quarto;}
+
+  const rails=$("rails"); rails.innerHTML="";
+  // agrupa canais por grupo (mantém ordem)
+  const grupos=[]; const map={};
+  canais.forEach(c=>{const g=c.grupo||"Canais";if(!map[g]){map[g]=[];grupos.push(g)}map[g].push(c)});
+
+  let flatIndex=0; const railEls=[];
+  if(!canais.length){
+    const empty=document.createElement("div");empty.className="rail-head";
+    empty.innerHTML=`<h2>Nenhum canal disponível</h2><span class="note">cadastre canais no gerenciador</span>`;
+    rails.appendChild(empty);
+  }
+  grupos.forEach(g=>{
+    const sec=document.createElement("section");sec.className="rail";
+    sec.innerHTML=`<div class="rail-head"><h2>${esc(g)}</h2></div>`;
+    const track=document.createElement("div");track.className="track track--ch";
+    map[g].forEach(c=>{
+      const idx=canais.indexOf(c);
+      const [c1,c2]=PAL[idx%PAL.length];
+      const el=document.createElement("button");el.className="tile";el.dataset.ch=idx;
+      el.style.setProperty("--c1",c1);el.style.setProperty("--c2",c2);
+      const art=c.logo_url?`<img class="ch-logo-img" src="${esc(c.logo_url)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ch-logo',textContent:'${esc((c.nome||'?')[0].toUpperCase())}'}))">`
+                          :`<span class="ch-logo">${esc((c.nome||"?")[0].toUpperCase())}</span>`;
+      el.innerHTML=`<div class="ch-art"><span class="live-badge"><i></i>AO VIVO</span>${art}</div>
+        <div class="ch-meta"><div class="num">CANAL ${c.numero!=null?String(c.numero).padStart(2,"0"):"—"}</div>
+        <div class="cname">${esc(c.nome)}</div></div>`;
+      el.onclick=()=>openChannel(idx);
+      track.appendChild(el);
+    });
+    sec.appendChild(track);rails.appendChild(sec);railEls.push(Array.from(track.children));
+  });
+
+  // trilho de serviços
+  const svc=document.createElement("section");svc.className="rail";
+  svc.innerHTML=`<div class="rail-head"><h2>Serviços do hotel</h2></div>`;
+  const st=document.createElement("div");st.className="track track--svc";
+  SERVICES.forEach(s=>{const el=document.createElement("button");el.className="tile";
+    el.innerHTML=`<div class="svc-inner"><div class="svc-ic">${s.ic}</div><div><div class="svc-t">${s.t}</div><div class="svc-s">${s.s}</div></div></div>`;
+    el.onclick=()=>{}; st.appendChild(el)});
+  svc.appendChild(st);rails.appendChild(svc);
+
+  // modelo de navegação: [ [heroCta], ...canaisPorTrilho, [servicos] ]
+  nav.rails=[[$("heroCta")], ...railEls, Array.from(st.children)];
+  nav.r=0;nav.c=0;
+  $("home").style.visibility="visible";
+  focusCell();
+}
+
+function focusCell(){
+  const row=nav.rails[nav.r];if(!row||!row.length)return;
+  nav.c=Math.max(0,Math.min(nav.c,row.length-1));
+  document.querySelectorAll(".is-focused").forEach(n=>n.classList.remove("is-focused"));
+  const el=row[nav.c];el.classList.add("is-focused");
+  el.scrollIntoView({block:"nearest",inline:"center"});
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+/* ================= Player ================= */
+function openChannel(idx){
+  if(!canais.length)return;
+  curIdx=(idx+canais.length)%canais.length;
+  const c=canais[curIdx];
+  $("player").classList.add("on");
+  $("ibNum").textContent=c.numero!=null?c.numero:"—";
+  $("ibName").textContent=c.nome;
+  $("ibGrp").textContent=c.grupo||"";
+  showInfo();
+  const st=$("pStatus");st.className="p-status";st.innerHTML=`<div><div class="spin"></div><div style="margin-top:12px">Sintonizando ${esc(c.nome)}…</div></div>`;
+  const video=$("video");cleanupHls();
+  const ok=()=>{st.classList.add("hide")};
+  const fail=m=>{st.className="p-status";st.innerHTML=`<div style="max-width:40ch"><div style="font-size:30px">📡</div><div style="margin-top:10px">Canal indisponível</div><div style="color:var(--faint);font-size:13px;margin-top:6px">${esc(m)}</div></div>`};
+  if(window.Hls&&Hls.isSupported()){
+    hls=new Hls({lowLatencyMode:true,liveSyncDurationCount:3});
+    hls.loadSource(c.stream_url);hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{ok();video.play().catch(()=>{})});
+    hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)fail(d.details||"erro de stream")});
+  }else if(video.canPlayType("application/vnd.apple.mpegurl")){
+    video.src=c.stream_url;video.play().catch(()=>{});
+    video.addEventListener("loadedmetadata",ok,{once:true});
+    video.addEventListener("error",()=>fail("não foi possível carregar"),{once:true});
+  }else{fail("player HLS indisponível neste dispositivo")}
+}
+function zap(dir){openChannel(curIdx+dir)}
+function tuneByNumber(n){
+  const found=canais.findIndex(c=>String(c.numero)===String(n));
+  if(found>=0)openChannel(found);
+}
+function closePlayer(){$("player").classList.remove("on");cleanupHls();focusCell()}
+function cleanupHls(){if(hls){try{hls.destroy()}catch(e){}hls=null}const v=$("video");v.pause();v.removeAttribute("src");try{v.load()}catch(e){}}
+function showInfo(){$("infobar").classList.remove("hide");clearTimeout(infoTimer);infoTimer=setTimeout(()=>$("infobar").classList.add("hide"),4500)}
+
+/* ================= Teclado / controle ================= */
+document.addEventListener("keydown",e=>{
+  const playing=$("player").classList.contains("on");
+  // dígitos sintonizam (só no player)
+  if(playing && /^[0-9]$/.test(e.key)){
+    tuneBuf+=e.key;$("tuning").textContent=tuneBuf;$("tuning").classList.add("on");
+    clearTimeout(tuneTimer);tuneTimer=setTimeout(()=>{tuneByNumber(tuneBuf);tuneBuf="";$("tuning").classList.remove("on")},1200);
+    return;
+  }
+  const back=e.key==="Escape"||e.key==="Backspace"||e.key==="GoBack"||e.key==="BrowserBack";
+  if(playing){
+    if(back){closePlayer();e.preventDefault();return}
+    switch(e.key){
+      case "ArrowUp":zap(-1);e.preventDefault();break;
+      case "ArrowDown":zap(1);e.preventDefault();break;
+      case "Enter":case "i":showInfo();e.preventDefault();break;
+    }
+    return;
+  }
+  // home
+  switch(e.key){
+    case "ArrowRight":nav.c++;focusCell();e.preventDefault();break;
+    case "ArrowLeft":nav.c--;focusCell();e.preventDefault();break;
+    case "ArrowDown":nav.r=Math.min(nav.rails.length-1,nav.r+1);focusCell();e.preventDefault();break;
+    case "ArrowUp":nav.r=Math.max(0,nav.r-1);focusCell();e.preventDefault();break;
+    case "Enter":{
+      const el=nav.rails[nav.r][nav.c];
+      if(el===$("heroCta")){ if(canais.length) openChannel(0); }
+      else if(el.dataset.ch!=null){ openChannel(+el.dataset.ch); }
+      else el.click();
+      e.preventDefault();break;
+    }
+  }
+});
+// mouse opcional (debug)
+document.addEventListener("mousemove",()=>{document.body.style.cursor="default";clearTimeout(window._ct);window._ct=setTimeout(()=>document.body.style.cursor="none",2500)});
+
+/* ================= Curtain ================= */
+function showCurtain(mode,msg){
+  const c=$("curtain");c.classList.remove("hide");
+  if(mode==="loading"){$("curtainBody").innerHTML=`<div class="spin"></div><h2>Carregando…</h2><p>Conectando à sua TV.</p>`}
+  else{$("curtainBody").innerHTML=`<h2>Não foi possível conectar</h2><p>${esc(msg||"")}</p><button class="btn" onclick="loadGrade()">↻ Tentar de novo</button>`}
+}
+function hideCurtain(){$("curtain").classList.add("hide")}
+
+/* ================= Clock ================= */
+function tick(){const n=new Date();
+  $("clock").textContent=n.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  $("date").textContent=n.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long"});
+}
+tick();setInterval(tick,15000);
+
+/* start */
+loadGrade();
+</script>
+</body>
+</html>
