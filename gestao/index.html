@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vetta TV · Gerenciador de Canais</title>
+<title>Vetta TV · Gestão</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
 <style>
   :root{
-    --bg:#141110;--bg2:#1b1614;--panel:#221c19;--panel2:#2b2320;
-    --line:#3a2f28;--ink:#f4ede2;--muted:#a89b8c;--faint:#6f6459;
-    --brass:#4f9fe8;--brass-dim:#2d6db2;--live:#e0563f;--ok:#57b98a;--danger:#d5624b;--radius:12px;
+    --bg:#f7fafd;--bg2:#eef3f9;--panel:#ffffff;--panel2:#f4f7fb;
+    --line:#d9e2ee;--ink:#152238;--muted:#5a6b84;--faint:#8595ab;
+    --brass:#2472d3;--brass-dim:#1b5cb0;--live:#e0563f;--ok:#1a9d6a;--danger:#d5624b;--radius:12px;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
-  body{background:linear-gradient(180deg,#0d1420,#0a1019);color:var(--ink);
+  body{background:linear-gradient(180deg,#f7fafd,#eef3f9);color:var(--ink);
     font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
   button{font:inherit;cursor:pointer}
   .hidden{display:none!important}
@@ -22,10 +22,10 @@
   /* ---------- Login ---------- */
   .login{min-height:100vh;display:grid;place-items:center;padding:24px}
   .login-card{width:100%;max-width:380px;background:linear-gradient(160deg,var(--panel2),var(--panel));
-    border:1px solid var(--line);border-radius:18px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+    border:1px solid var(--line);border-radius:18px;padding:34px 30px;box-shadow:0 24px 60px rgba(20,40,80,.16)}
   .login-logo{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;margin:0 auto 18px;
-    background:linear-gradient(160deg,#182436,#0d1420);border:1px solid var(--line)}
-  .login-logo b{font-family:"Iowan Old Style",Palatino,Georgia,serif;color:var(--brass);font-size:26px}
+    background:linear-gradient(160deg,var(--brass),var(--brass-dim));border:1px solid var(--line)}
+  .login-logo b{font-family:"Iowan Old Style",Palatino,Georgia,serif;color:#fff;font-size:26px}
   .login h1{font-size:20px;text-align:center;margin:0 0 4px}
   .login .sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px}
   .field{margin-bottom:14px}
@@ -41,7 +41,7 @@
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;
     border:1px solid var(--line);background:var(--panel);color:var(--ink);transition:.14s}
   .btn:hover{border-color:var(--brass-dim);background:var(--panel2)}
-  .btn.primary{background:linear-gradient(180deg,var(--brass),var(--brass-dim));color:#08131f;border:none;font-weight:700}
+  .btn.primary{background:linear-gradient(180deg,var(--brass),var(--brass-dim));color:#fff;border:none;font-weight:700}
   .btn.primary:hover{filter:brightness(1.05)}
   .btn.block{width:100%}
   .btn.ghost{background:none}
@@ -50,18 +50,24 @@
   .linkbtn{background:none;border:none;color:var(--brass);font-size:13px;padding:4px}
   .linkbtn:hover{text-decoration:underline}
   .msg{font-size:13px;border-radius:9px;padding:10px 12px;margin-bottom:14px}
-  .msg.err{background:rgba(213,98,75,.12);border:1px solid var(--danger);color:#e8a597}
-  .msg.ok{background:rgba(87,185,138,.1);border:1px solid var(--ok);color:#9bd6ba}
+  .msg.err{background:rgba(213,98,75,.1);border:1px solid var(--danger);color:#b23b26}
+  .msg.ok{background:rgba(26,157,106,.1);border:1px solid var(--ok);color:#157a4f}
 
   /* ---------- App ---------- */
   .wrap{max-width:1240px;margin:0 auto;padding:22px clamp(16px,3vw,40px) 60px}
-  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
   .brand{display:flex;align-items:center;gap:13px}
-  .logo{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(160deg,#182436,#0d1420);border:1px solid var(--line)}
-  .logo b{font-family:"Iowan Old Style",Palatino,Georgia,serif;color:var(--brass);font-size:21px}
+  .logo{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(160deg,var(--brass),var(--brass-dim));border:1px solid var(--line)}
+  .logo b{font-family:"Iowan Old Style",Palatino,Georgia,serif;color:#fff;font-size:21px}
   .brand h1{font-size:18px;margin:0;font-weight:600}
   .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
   .whoami{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+
+  .tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .tab{background:none;border:none;color:var(--muted);padding:11px 16px;font:inherit;font-size:15px;
+    border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--brass);border-bottom-color:var(--brass);font-weight:600}
 
   .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
   .hotelsel{display:flex;align-items:center;gap:8px}
@@ -69,18 +75,21 @@
   .search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
   .search input{flex:1;background:none;border:none;color:var(--ink);font:inherit;outline:none}
   .search svg{opacity:.5}
+  .spacer{flex:1}
 
   table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
   thead th{text-align:left;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--faint);padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg2)}
   tbody td{padding:11px 14px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
   tbody tr:last-child td{border-bottom:none}
-  tbody tr:hover{background:rgba(79,159,232,.04)}
+  tbody tr:hover{background:rgba(36,114,211,.05)}
   .cell-logo{width:44px}
   .clogo{width:38px;height:38px;border-radius:8px;object-fit:cover;background:var(--panel2);display:grid;place-items:center;font-family:Georgia,serif;color:var(--brass);font-weight:700;font-size:14px}
+  .swatch{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);display:inline-block;vertical-align:middle}
   .cnum{font-variant-numeric:tabular-nums;color:var(--muted);width:56px}
   .cname{font-weight:600}
   .cgrp{color:var(--muted);font-size:12px}
   .curl{color:var(--faint);font-size:12px;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,Consolas,monospace}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--muted)}
   .status-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
   .status-pill.on{color:var(--ok)}.status-pill.on i{background:var(--ok)}
   .status-pill.off{color:var(--faint)}.status-pill.off i{background:var(--faint)}
@@ -89,12 +98,14 @@
   .icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);display:grid;place-items:center;font-size:14px}
   .icon-btn:hover{border-color:var(--brass-dim)}
   .icon-btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+  .txt-btn{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 11px;font-size:13px}
+  .txt-btn:hover{border-color:var(--brass-dim)}
   .empty{padding:52px 20px;text-align:center;color:var(--muted)}
   .empty h3{color:var(--ink);margin:0 0 6px}
 
-  .modal{position:fixed;inset:0;z-index:40;display:none;place-items:center;padding:20px;background:rgba(10,8,7,.72);backdrop-filter:blur(5px)}
+  .modal{position:fixed;inset:0;z-index:40;display:none;place-items:center;padding:20px;background:rgba(20,33,58,.4);backdrop-filter:blur(5px)}
   .modal.on{display:grid}
-  .card{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;width:100%;max-width:560px;max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .card{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;width:100%;max-width:560px;max-height:92vh;overflow:auto;box-shadow:0 24px 60px rgba(20,40,80,.18)}
   .card.wide{max-width:860px}
   .card-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
   .card-head h2{margin:0;font-size:17px}
@@ -107,19 +118,31 @@
   .switch{display:flex;align-items:center;gap:10px}
   .switch input{width:auto}
   .field textarea{min-height:170px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.5}
+  .color-row{display:flex;align-items:center;gap:10px}
+  .color-row input[type=color]{width:46px;height:42px;padding:2px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;cursor:pointer}
+  .color-row input[type=text]{flex:1}
+
+  /* boxes */
+  .box-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+  .box-item{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--bg2)}
+  .box-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .box-quarto{font-weight:600}
+  .box-url{display:flex;gap:8px;margin-top:9px}
+  .box-url input{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:8px 10px;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;outline:none}
+  .seen{font-size:11px;color:var(--faint)}
+  .seen.live{color:var(--ok)}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--panel2);border:1px solid var(--brass-dim);border-radius:10px;padding:12px 18px;font-size:14px;z-index:60;transition:.2s;pointer-events:none}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
   .player-wrap{background:#000;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9}
   .player-wrap video{width:100%;height:100%;display:block;background:#000}
   .player-status{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--muted);padding:20px}
   .player-status.hide{display:none}
-  .spin{width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:var(--brass);animation:sp 1s linear infinite;margin:0 auto 12px}
+  .spin{width:30px;height:30px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--brass);animation:sp 1s linear infinite;margin:0 auto 12px}
   @keyframes sp{to{transform:rotate(360deg)}}
   .player-meta{margin-top:14px;font-size:13px;color:var(--muted)}
-  .player-meta b{color:var(--ink)}
   .player-url{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--faint);word-break:break-all;margin-top:6px}
-
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--panel2);border:1px solid var(--brass-dim);border-radius:10px;padding:12px 18px;font-size:14px;z-index:60;transition:.2s;pointer-events:none}
-  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}.curl{max-width:110px}}
 </style>
 </head>
@@ -130,17 +153,13 @@
   <div class="login-card">
     <div class="login-logo"><b>V</b></div>
     <h1>Vetta TV</h1>
-    <div class="sub">Gerenciador de canais</div>
+    <div class="sub">Painel de gestão</div>
     <div id="loginMsg"></div>
-    <div class="field">
-      <label>E-mail</label>
-      <input id="liEmail" type="email" autocomplete="username" placeholder="voce@empresa.com">
-    </div>
-    <div class="field">
-      <label>Senha</label>
+    <div class="field"><label>E-mail</label><input id="liEmail" type="email" autocomplete="username" placeholder="voce@empresa.com"></div>
+    <div class="field"><label>Senha</label>
       <div class="pw-wrap">
         <input id="liPass" type="password" autocomplete="current-password" placeholder="••••••••">
-        <button class="eye" id="eyeBtn" type="button" title="Mostrar/ocultar senha" aria-label="Mostrar senha">
+        <button class="eye" id="eyeBtn" type="button" title="Mostrar/ocultar senha">
           <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
@@ -153,31 +172,42 @@
 <!-- ===================== APP ===================== -->
 <div class="wrap hidden" id="appView">
   <header class="top">
-    <div class="brand">
-      <div class="logo"><b>V</b></div>
-      <div><h1>Gerenciador de Canais</h1><div class="sub">Vetta TV · alimenta a launcher dos quartos</div></div>
-    </div>
+    <div class="brand"><div class="logo"><b>V</b></div>
+      <div><h1>Vetta TV · Gestão</h1><div class="sub">hotéis, canais e boxes dos quartos</div></div></div>
     <div class="whoami"><span id="whoEmail"></span><button class="btn sm" id="logoutBtn">Sair</button></div>
   </header>
 
-  <div class="controls">
-    <div class="hotelsel">
-      <label style="color:var(--muted);font-size:13px">Hotel</label>
-      <select id="hotelSelect"></select>
-    </div>
-    <label class="search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="search" type="search" placeholder="Buscar canal ou grupo…">
-    </label>
-    <button class="btn" id="btnImport">⬇ Importar M3U</button>
-    <button class="btn" id="btnExport">⬆ Exportar</button>
-    <button class="btn primary" id="btnNew">＋ Novo canal</button>
-  </div>
+  <nav class="tabs">
+    <button class="tab active" data-view="hoteis">Hotéis</button>
+    <button class="tab" data-view="canais">Canais</button>
+  </nav>
 
-  <div id="tableHost"></div>
+  <!-- ===== HOTÉIS ===== -->
+  <section id="viewHoteis">
+    <div class="controls">
+      <div class="spacer"></div>
+      <button class="btn primary" id="btnNewHotel">＋ Novo hotel</button>
+    </div>
+    <div id="hotelsHost"></div>
+  </section>
+
+  <!-- ===== CANAIS ===== -->
+  <section id="viewCanais" class="hidden">
+    <div class="controls">
+      <div class="hotelsel"><label style="color:var(--muted);font-size:13px">Hotel</label><select id="hotelSelect"></select></div>
+      <label class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search" type="search" placeholder="Buscar canal ou grupo…">
+      </label>
+      <button class="btn" id="btnImport">⬇ Importar M3U</button>
+      <button class="btn" id="btnExport">⬆ Exportar</button>
+      <button class="btn primary" id="btnNew">＋ Novo canal</button>
+    </div>
+    <div id="tableHost"></div>
+  </section>
 </div>
 
-<!-- form -->
+<!-- form canal -->
 <div class="modal" id="mForm"><div class="card">
   <div class="card-head"><h2 id="formTitle">Novo canal</h2><button class="x" data-close>✕</button></div>
   <div class="card-body">
@@ -200,14 +230,51 @@
   </div>
 </div></div>
 
+<!-- form hotel -->
+<div class="modal" id="mHotel"><div class="card">
+  <div class="card-head"><h2 id="hotelTitle">Novo hotel</h2><button class="x" data-close>✕</button></div>
+  <div class="card-body">
+    <input type="hidden" id="hId">
+    <div class="grid2">
+      <div class="field"><label>Nome do hotel *</label><input id="hNome" placeholder="Ex.: CR Hotel Bueno"></div>
+      <div class="field"><label>Cidade</label><input id="hCidade" placeholder="Ex.: Goiânia"></div>
+    </div>
+    <div class="field"><label>Identificador (slug) *</label><input id="hSlug" placeholder="cr-hotel-bueno" spellcheck="false"><div class="hint">Usado internamente e na URL de preview. Só letras, números e hífen.</div></div>
+    <div class="field"><label>Cor da marca (tema da launcher)</label>
+      <div class="color-row"><input type="color" id="hCorPicker" value="#4f9fe8"><input type="text" id="hCor" value="#4f9fe8" spellcheck="false"></div>
+    </div>
+    <div class="field"><label>Mensagem de boas-vindas</label><input id="hBoas" placeholder="Bem-vindo(a) ao CR Hotel Bueno"></div>
+    <div class="field"><label>Logo do hotel (URL, opcional)</label><input id="hLogoUrl" placeholder="https://…/logo.png"></div>
+    <div class="switch"><input type="checkbox" id="hAtivo" checked><label for="hAtivo" style="margin:0">Hotel ativo</label></div>
+  </div>
+  <div class="card-foot">
+    <button class="btn ghost" data-close>Cancelar</button>
+    <button class="btn primary" id="btnSaveHotel">Salvar hotel</button>
+  </div>
+</div></div>
+
+<!-- boxes do hotel -->
+<div class="modal" id="mBoxes"><div class="card wide">
+  <div class="card-head"><h2 id="boxesTitle">Boxes do hotel</h2><button class="x" data-close>✕</button></div>
+  <div class="card-body">
+    <div class="hint" style="margin-bottom:14px">Cada box (aparelho na TV do quarto) tem um link único. Cole o link no <b>Fully Kiosk → Start URL</b>.</div>
+    <div class="box-list" id="boxList"></div>
+    <div class="grid2">
+      <div class="field"><label>Quarto / apto</label><input id="bxQuarto" placeholder="Ex.: 214"></div>
+      <div class="field"><label>Rótulo (opcional)</label><input id="bxNome" placeholder="Ex.: Box recepção"></div>
+    </div>
+    <button class="btn primary" id="btnAddBox">＋ Adicionar box</button>
+  </div>
+  <div class="card-foot"><button class="btn ghost" data-close>Fechar</button></div>
+</div></div>
+
 <!-- import -->
 <div class="modal" id="mImport"><div class="card wide">
   <div class="card-head"><h2>Importar lista M3U</h2><button class="x" data-close>✕</button></div>
   <div class="card-body">
-    <div class="field">
-      <label>Cole o conteúdo da lista (linhas #EXTINF + URL)</label>
+    <div class="field"><label>Cole o conteúdo da lista (linhas #EXTINF + URL)</label>
       <textarea id="m3uText" placeholder="#EXTM3U&#10;#EXTINF:-1 tvg-logo=&quot;…&quot; group-title=&quot;Esportes&quot;,Esporte 24&#10;https://…/index.m3u8?token=…"></textarea>
-      <div class="hint">Lê <b>tvg-logo</b>→logo, <b>group-title</b>→grupo, nome após a vírgula→nome, linha seguinte→link. Os canais entram no hotel selecionado. A responsabilidade das fontes é sua.</div>
+      <div class="hint">Lê tvg-logo→logo, group-title→grupo, nome após a vírgula→nome, linha seguinte→link. Entram no hotel selecionado. A responsabilidade das fontes é sua.</div>
     </div>
     <div id="importPreview" class="hint"></div>
   </div>
@@ -233,82 +300,176 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ================= Config ================= */
-const SUPABASE_URL = "https://ncwzkksjwjiikrkfuhqw.supabase.co";
-const SUPABASE_ANON = "sb_publishable_h3OvQQXmwzjrNh0orsQK-A_vfJwG4aO";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const SUPABASE_URL="https://ncwzkksjwjiikrkfuhqw.supabase.co";
+const SUPABASE_ANON="sb_publishable_h3OvQQXmwzjrNh0orsQK-A_vfJwG4aO";
+const APP_URL="https://pessonitecnologia.github.io/vetta-tv-app/";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
 
-let hotels = [], canais = [], currentHotel = null;
-
-/* ================= Helpers ================= */
-const $ = id => document.getElementById(id);
+let hotels=[], canais=[], currentHotel=null;
+const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),2400)}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),2400)}
 function show(id){$(id).classList.add("on")}
 function hide(id){$(id).classList.remove("on");if(id==="mPlayer")cleanupHls()}
-function loginMsg(kind,text){$("loginMsg").innerHTML=text?`<div class="msg ${kind}">${esc(text)}</div>`:""}
+function loginMsg(k,t){$("loginMsg").innerHTML=t?`<div class="msg ${k}">${esc(t)}</div>`:""}
+function slugify(s){return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")}
 
-/* ================= Auth ================= */
-$("eyeBtn").onclick=()=>{
-  const p=$("liPass");const open=p.type==="password";p.type=open?"text":"password";
-  $("eyeIcon").innerHTML=open
-    ? '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="3" x2="21" y2="21"/>'
-    : '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
-};
+/* ===== Auth ===== */
+$("eyeBtn").onclick=()=>{const p=$("liPass");const open=p.type==="password";p.type=open?"text":"password";
+  $("eyeIcon").innerHTML=open?'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="3" x2="21" y2="21"/>':'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';};
 $("loginBtn").onclick=doLogin;
 $("liPass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin()});
 async function doLogin(){
-  const email=$("liEmail").value.trim(), password=$("liPass").value;
+  const email=$("liEmail").value.trim(),password=$("liPass").value;
   if(!email||!password){loginMsg("err","Preencha e-mail e senha.");return}
-  loginMsg("", "");$("loginBtn").textContent="Entrando…";
+  loginMsg("","");$("loginBtn").textContent="Entrando…";
   const {error}=await sb.auth.signInWithPassword({email,password});
   $("loginBtn").textContent="Entrar";
   if(error){loginMsg("err","E-mail ou senha inválidos.");return}
   boot();
 }
-$("forgotBtn").onclick=async()=>{
-  const email=$("liEmail").value.trim();
-  if(!email){loginMsg("err","Digite seu e-mail acima e clique de novo em “Esqueci a senha”.");return}
-  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
-  loginMsg(error?"err":"ok", error?"Não foi possível enviar agora.":"Enviamos um link de redefinição para seu e-mail.");
-};
+$("forgotBtn").onclick=async()=>{const email=$("liEmail").value.trim();
+  if(!email){loginMsg("err","Digite seu e-mail acima e clique de novo.");return}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.href});
+  loginMsg(error?"err":"ok",error?"Não foi possível enviar agora.":"Enviamos um link de redefinição para seu e-mail.");};
 $("logoutBtn").onclick=async()=>{await sb.auth.signOut();location.reload()};
 
-/* ================= Boot ================= */
+/* ===== Boot ===== */
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
   if(!session){$("loginView").classList.remove("hidden");$("appView").classList.add("hidden");return}
   $("loginView").classList.add("hidden");$("appView").classList.remove("hidden");
   $("whoEmail").textContent=session.user.email;
   await loadHotels();
-  await loadCanais();
+  showView("hoteis");
 }
-sb.auth.getSession().then(({data})=>{ if(data.session) boot(); });
+sb.auth.getSession().then(({data})=>{if(data.session)boot()});
 
-/* ================= Hotéis ================= */
+/* ===== Tabs ===== */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>showView(t.dataset.view));
+function showView(v){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===v));
+  $("viewHoteis").classList.toggle("hidden",v!=="hoteis");
+  $("viewCanais").classList.toggle("hidden",v!=="canais");
+  if(v==="hoteis")renderHotels();
+  if(v==="canais")loadCanais();
+}
+
+/* ===== Hotéis ===== */
 async function loadHotels(){
-  const {data,error}=await sb.from("hotel").select("id,nome,slug").order("nome");
+  const {data,error}=await sb.from("hotel").select("*").order("nome");
   if(error){toast("Erro ao carregar hotéis");return}
   hotels=data||[];
   const sel=$("hotelSelect");
-  sel.innerHTML=`<option value="__global">🌐 Global (todos os hotéis)</option>`+
-    hotels.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join("");
-  currentHotel = hotels[0]?.id || "__global";
+  sel.innerHTML=`<option value="__global">🌐 Global (todos)</option>`+hotels.map(h=>`<option value="${h.id}">${esc(h.nome)}</option>`).join("");
+  if(!currentHotel)currentHotel=hotels[0]?.id||"__global";
   sel.value=currentHotel;
-  sel.onchange=async()=>{currentHotel=sel.value;await loadCanais()};
+  sel.onchange=()=>{currentHotel=sel.value;loadCanais()};
 }
-function hotelIdForWrite(){return currentHotel==="__global"?null:currentHotel}
+function renderHotels(){
+  const host=$("hotelsHost");
+  if(!hotels.length){host.innerHTML=`<div class="empty"><h3>Nenhum hotel ainda</h3><p>Clique em <b>Novo hotel</b> para cadastrar o primeiro.</p></div>`;return}
+  host.innerHTML=`<table><thead><tr><th></th><th>Hotel</th><th>Cidade</th><th>Cor</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead><tbody>${hotels.map(hotelRow).join("")}</tbody></table>`;
+  host.querySelectorAll("[data-eh]").forEach(b=>b.onclick=()=>openHotelForm(b.dataset.eh));
+  host.querySelectorAll("[data-bx]").forEach(b=>b.onclick=()=>openBoxes(b.dataset.bx));
+  host.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{currentHotel=b.dataset.ch;$("hotelSelect").value=currentHotel;showView("canais")});
+  host.querySelectorAll("[data-dh]").forEach(b=>b.onclick=()=>delHotel(b.dataset.dh));
+}
+function hotelRow(h){
+  const cor=(h.branding&&h.branding.cor)||"#4f9fe8";
+  const initial=esc((h.nome||"?")[0].toUpperCase());
+  return `<tr>
+    <td class="cell-logo"><div class="clogo">${initial}</div></td>
+    <td><div class="cname">${esc(h.nome)}</div><div class="mono">${esc(h.slug)}</div></td>
+    <td class="cgrp">${esc(h.cidade||"—")}</td>
+    <td><span class="swatch" style="background:${esc(cor)}"></span></td>
+    <td><span class="status-pill ${h.ativo?"on":"off"}"><i></i>${h.ativo?"Ativo":"Inativo"}</span></td>
+    <td><div class="row-actions">
+      <button class="txt-btn" data-bx="${h.id}">📺 Boxes</button>
+      <button class="txt-btn" data-ch="${h.id}">Canais</button>
+      <button class="icon-btn" data-eh="${h.id}" title="Editar">✏</button>
+      <button class="icon-btn danger" data-dh="${h.id}" title="Excluir">🗑</button>
+    </div></td></tr>`;
+}
+$("btnNewHotel").onclick=()=>openHotelForm(null);
+$("hCorPicker").oninput=e=>{$("hCor").value=e.target.value};
+$("hCor").oninput=e=>{if(/^#[0-9a-fA-F]{6}$/.test(e.target.value))$("hCorPicker").value=e.target.value};
+$("hNome").addEventListener("blur",()=>{if(!$("hId").value&&!$("hSlug").value)$("hSlug").value=slugify($("hNome").value)});
+function openHotelForm(id){
+  const h=id?hotels.find(x=>x.id===id):null;const b=(h&&h.branding)||{};
+  $("hotelTitle").textContent=h?"Editar hotel":"Novo hotel";
+  $("hId").value=h?h.id:"";
+  $("hNome").value=h?h.nome:"";
+  $("hCidade").value=h?(h.cidade||""):"";
+  $("hSlug").value=h?h.slug:"";
+  const cor=b.cor||"#4f9fe8";$("hCor").value=cor;$("hCorPicker").value=/^#[0-9a-fA-F]{6}$/.test(cor)?cor:"#4f9fe8";
+  $("hBoas").value=b.boasVindas||"";
+  $("hLogoUrl").value=b.logo||"";
+  $("hAtivo").checked=h?!!h.ativo:true;
+  show("mHotel");setTimeout(()=>$("hNome").focus(),50);
+}
+$("btnSaveHotel").onclick=async()=>{
+  const nome=$("hNome").value.trim();let slug=$("hSlug").value.trim()||slugify(nome);
+  if(!nome){toast("Informe o nome");return}
+  if(!slug){toast("Informe o identificador");return}
+  const branding={cor:$("hCor").value.trim()||"#4f9fe8",boasVindas:$("hBoas").value.trim(),logo:$("hLogoUrl").value.trim()};
+  const rec={nome,slug,cidade:$("hCidade").value.trim()||null,branding,ativo:$("hAtivo").checked};
+  const id=$("hId").value;
+  let res=id?await sb.from("hotel").update(rec).eq("id",id):await sb.from("hotel").insert(rec);
+  if(res.error){toast(res.error.message.includes("duplicate")?"Já existe hotel com esse identificador":"Erro: "+res.error.message);return}
+  hide("mHotel");await loadHotels();renderHotels();toast(id?"Hotel atualizado":"Hotel criado");
+};
+async function delHotel(id){
+  const h=hotels.find(x=>x.id===id);
+  if(!confirm(`Excluir "${h.nome}"? Isso remove também seus canais e boxes.`))return;
+  const {error}=await sb.from("hotel").delete().eq("id",id);
+  if(error){toast("Erro ao excluir");return}
+  currentHotel=null;await loadHotels();renderHotels();toast("Hotel excluído");
+}
 
-/* ================= Canais ================= */
+/* ===== Boxes ===== */
+let boxesHotelId=null;
+async function openBoxes(hotelId){
+  boxesHotelId=hotelId;const h=hotels.find(x=>x.id===hotelId);
+  $("boxesTitle").textContent="Boxes · "+(h?h.nome:"");
+  $("bxQuarto").value="";$("bxNome").value="";
+  show("mBoxes");await renderBoxes();
+}
+async function renderBoxes(){
+  const {data,error}=await sb.from("dispositivo").select("*").eq("hotel_id",boxesHotelId).order("created_at");
+  const host=$("boxList");
+  if(error){host.innerHTML=`<div class="hint">Erro ao carregar.</div>`;return}
+  if(!data.length){host.innerHTML=`<div class="hint">Nenhum box ainda. Adicione o primeiro abaixo.</div>`;return}
+  host.innerHTML=data.map(d=>{
+    const url=APP_URL+"?device="+d.device_token;
+    const seen=d.last_seen_at?`<span class="seen ${Date.now()-new Date(d.last_seen_at)<180000?"live":""}">visto ${new Date(d.last_seen_at).toLocaleString("pt-BR")}</span>`:`<span class="seen">nunca conectou</span>`;
+    return `<div class="box-item"><div class="box-top">
+        <div><span class="box-quarto">${esc(d.quarto||"—")}</span> ${d.nome?`<span class="cgrp">· ${esc(d.nome)}</span>`:""}<div>${seen}</div></div>
+        <button class="icon-btn danger" data-delbox="${d.id}" title="Excluir">🗑</button></div>
+        <div class="box-url"><input readonly value="${esc(url)}"><button class="txt-btn" data-copy="${esc(url)}">Copiar</button></div>
+      </div>`;
+  }).join("");
+  host.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);toast("Start URL copiado")});
+  host.querySelectorAll("[data-delbox]").forEach(b=>b.onclick=async()=>{if(!confirm("Excluir este box?"))return;await sb.from("dispositivo").delete().eq("id",b.dataset.delbox);renderBoxes();toast("Box excluído")});
+}
+$("btnAddBox").onclick=async()=>{
+  const quarto=$("bxQuarto").value.trim();
+  if(!quarto){toast("Informe o quarto");return}
+  const {error}=await sb.from("dispositivo").insert({hotel_id:boxesHotelId,quarto,nome:$("bxNome").value.trim()||null});
+  if(error){toast("Erro: "+error.message);return}
+  $("bxQuarto").value="";$("bxNome").value="";await renderBoxes();toast("Box criado");
+};
+
+/* ===== Canais ===== */
+function hotelIdForWrite(){return currentHotel==="__global"?null:currentHotel}
 async function loadCanais(){
   let q=sb.from("canal").select("*").order("ordem").order("numero",{nullsFirst:false});
-  q = currentHotel==="__global" ? q.is("hotel_id",null) : q.eq("hotel_id",currentHotel);
+  q=currentHotel==="__global"?q.is("hotel_id",null):q.eq("hotel_id",currentHotel);
   const {data,error}=await q;
   if(error){toast("Erro ao carregar canais");return}
-  canais=data||[];
-  render();
+  canais=data||[];renderCanais();
 }
-function render(){
+function renderCanais(){
   const term=$("search").value.trim().toLowerCase();
   const list=canais.filter(c=>!term||((c.nome||"")+" "+(c.grupo||"")).toLowerCase().includes(term));
   const grupos=[...new Set(canais.map(c=>c.grupo).filter(Boolean))].sort();
@@ -316,21 +477,17 @@ function render(){
   const host=$("tableHost");
   if(!canais.length){host.innerHTML=`<div class="empty"><h3>Nenhum canal neste hotel</h3><p>Use <b>Novo canal</b> ou <b>Importar M3U</b>.</p></div>`;return}
   if(!list.length){host.innerHTML=`<div class="empty"><h3>Nada encontrado</h3></div>`;return}
-  host.innerHTML=`<table><thead><tr><th></th><th>Nº</th><th>Canal</th><th>Grupo</th><th>Stream</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead><tbody>${list.map(rowHtml).join("")}</tbody></table>`;
+  host.innerHTML=`<table><thead><tr><th></th><th>Nº</th><th>Canal</th><th>Grupo</th><th>Stream</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead><tbody>${list.map(canalRow).join("")}</tbody></table>`;
   host.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>{const c=canais.find(x=>x.id===b.dataset.play);openPlayerUrl(c.nome,c.stream_url)});
   host.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openForm(b.dataset.edit));
   host.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>del(b.dataset.del));
 }
-function rowHtml(c){
+function canalRow(c){
   const initial=esc((c.nome||"?")[0].toUpperCase());
-  const logo=c.logo_url
-    ?`<img class="clogo" src="${esc(c.logo_url)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'clogo',textContent:'${initial}'}))">`
-    :`<div class="clogo">${initial}</div>`;
+  const logo=c.logo_url?`<img class="clogo" src="${esc(c.logo_url)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'clogo',textContent:'${initial}'}))">`:`<div class="clogo">${initial}</div>`;
   return `<tr>
-    <td class="cell-logo">${logo}</td>
-    <td class="cnum">${c.numero??"—"}</td>
-    <td><div class="cname">${esc(c.nome)}</div></td>
-    <td class="cgrp">${esc(c.grupo||"—")}</td>
+    <td class="cell-logo">${logo}</td><td class="cnum">${c.numero??"—"}</td>
+    <td><div class="cname">${esc(c.nome)}</div></td><td class="cgrp">${esc(c.grupo||"—")}</td>
     <td class="curl" title="${esc(c.stream_url)}">${esc(c.stream_url)}</td>
     <td><span class="status-pill ${c.ativo?"on":"off"}"><i></i>${c.ativo?"Ativo":"Inativo"}</span></td>
     <td><div class="row-actions">
@@ -339,91 +496,59 @@ function rowHtml(c){
       <button class="icon-btn danger" data-del="${c.id}" title="Excluir">🗑</button>
     </div></td></tr>`;
 }
-
-/* ------- form ------- */
 $("btnNew").onclick=()=>openForm(null);
 function openForm(id){
   const c=id?canais.find(x=>x.id===id):null;
   $("formTitle").textContent=c?"Editar canal":"Novo canal";
-  $("fId").value=c?c.id:"";
-  $("fNome").value=c?c.nome:"";
-  $("fNumero").value=c?(c.numero??""):"";
-  $("fGrupo").value=c?(c.grupo||""):"";
-  $("fLogo").value=c?(c.logo_url||""):"";
-  $("fUrl").value=c?c.stream_url:"";
+  $("fId").value=c?c.id:"";$("fNome").value=c?c.nome:"";$("fNumero").value=c?(c.numero??""):"";
+  $("fGrupo").value=c?(c.grupo||""):"";$("fLogo").value=c?(c.logo_url||""):"";$("fUrl").value=c?c.stream_url:"";
   $("fAtivo").checked=c?!!c.ativo:true;
   show("mForm");setTimeout(()=>$("fNome").focus(),50);
 }
 $("btnSave").onclick=async()=>{
-  const nome=$("fNome").value.trim(), stream_url=$("fUrl").value.trim();
-  if(!nome){toast("Informe o nome");return}
-  if(!stream_url){toast("Informe o link");return}
+  const nome=$("fNome").value.trim(),stream_url=$("fUrl").value.trim();
+  if(!nome){toast("Informe o nome");return}if(!stream_url){toast("Informe o link");return}
   const numeroRaw=$("fNumero").value.trim();
-  const rec={nome,stream_url,numero:numeroRaw?parseInt(numeroRaw,10):null,
-    grupo:$("fGrupo").value.trim()||null,logo_url:$("fLogo").value.trim()||null,
-    ativo:$("fAtivo").checked, hotel_id:hotelIdForWrite()};
-  const id=$("fId").value;
-  let res;
-  if(id){res=await sb.from("canal").update(rec).eq("id",id)}
-  else{rec.ordem=(canais.reduce((m,c)=>Math.max(m,c.ordem||0),0))+1; res=await sb.from("canal").insert(rec)}
+  const rec={nome,stream_url,numero:numeroRaw?parseInt(numeroRaw,10):null,grupo:$("fGrupo").value.trim()||null,logo_url:$("fLogo").value.trim()||null,ativo:$("fAtivo").checked,hotel_id:hotelIdForWrite()};
+  const id=$("fId").value;let res;
+  if(id)res=await sb.from("canal").update(rec).eq("id",id);
+  else{rec.ordem=(canais.reduce((m,c)=>Math.max(m,c.ordem||0),0))+1;res=await sb.from("canal").insert(rec)}
   if(res.error){toast("Erro ao salvar: "+res.error.message);return}
   hide("mForm");await loadCanais();toast(id?"Canal atualizado":"Canal adicionado");
 };
 $("btnTestForm").onclick=()=>{const u=$("fUrl").value.trim();if(!u){toast("Cole o link");return}openPlayerUrl($("fNome").value.trim()||"Teste",u)};
-async function del(id){
-  const c=canais.find(x=>x.id===id);
-  if(!confirm(`Excluir o canal “${c.nome}”?`))return;
-  const {error}=await sb.from("canal").delete().eq("id",id);
-  if(error){toast("Erro ao excluir");return}
-  await loadCanais();toast("Canal excluído");
-}
+async function del(id){const c=canais.find(x=>x.id===id);if(!confirm(`Excluir "${c.nome}"?`))return;
+  const {error}=await sb.from("canal").delete().eq("id",id);if(error){toast("Erro");return}await loadCanais();toast("Canal excluído")}
 
-/* ------- import M3U ------- */
+/* import */
 $("btnImport").onclick=()=>{$("m3uText").value="";$("importPreview").textContent="";$("btnDoImport").disabled=true;$("btnDoImport").textContent="Importar 0";show("mImport")};
 let parsed=[];
-$("btnParse").onclick=()=>{
-  parsed=parseM3U($("m3uText").value);
-  const prev=$("importPreview");
+$("btnParse").onclick=()=>{parsed=parseM3U($("m3uText").value);const prev=$("importPreview");
   if(!parsed.length){prev.innerHTML=`<span style="color:var(--danger)">Nenhum canal reconhecido.</span>`;$("btnDoImport").disabled=true;return}
   const g=[...new Set(parsed.map(c=>c.grupo).filter(Boolean))];
-  prev.innerHTML=`✔ <b style="color:var(--ok)">${parsed.length}</b> canais${g.length?` · ${g.length} grupos`:""} → entram em <b>${esc(currentHotelName())}</b>`;
-  $("btnDoImport").disabled=false;$("btnDoImport").textContent=`Importar ${parsed.length}`;
-};
-$("btnDoImport").onclick=async()=>{
-  let ordem=(canais.reduce((m,c)=>Math.max(m,c.ordem||0),0))+1;
+  prev.innerHTML=`✔ <b style="color:var(--ok)">${parsed.length}</b> canais${g.length?` · ${g.length} grupos`:""} → <b>${esc(currentHotel==="__global"?"Global":(hotels.find(h=>h.id===currentHotel)?.nome||"—"))}</b>`;
+  $("btnDoImport").disabled=false;$("btnDoImport").textContent=`Importar ${parsed.length}`;};
+$("btnDoImport").onclick=async()=>{let ordem=(canais.reduce((m,c)=>Math.max(m,c.ordem||0),0))+1;
   const rows=parsed.map(c=>({nome:c.nome,stream_url:c.url,grupo:c.grupo||null,logo_url:c.logo||null,numero:null,ativo:true,ordem:ordem++,hotel_id:hotelIdForWrite()}));
-  const {error}=await sb.from("canal").insert(rows);
-  if(error){toast("Erro ao importar: "+error.message);return}
-  hide("mImport");await loadCanais();toast(`${rows.length} canais importados`);
-};
-function currentHotelName(){return currentHotel==="__global"?"Global":(hotels.find(h=>h.id===currentHotel)?.nome||"—")}
-function parseM3U(text){
-  const lines=text.split(/\r?\n/);const out=[];let cur=null;
+  const {error}=await sb.from("canal").insert(rows);if(error){toast("Erro: "+error.message);return}
+  hide("mImport");await loadCanais();toast(`${rows.length} canais importados`);};
+function parseM3U(text){const lines=text.split(/\r?\n/);const out=[];let cur=null;
   for(let raw of lines){const line=raw.trim();if(!line)continue;
-    if(line.startsWith("#EXTINF")){
-      const comma=line.indexOf(",");
-      const attrs=comma>-1?line.slice(0,comma):line;
-      const name=comma>-1?line.slice(comma+1).trim():"";
-      cur={nome:name||"Canal",grupo:attr(attrs,"group-title"),logo:attr(attrs,"tvg-logo")};
-    }else if(!line.startsWith("#")){
-      if(cur){cur.url=line;out.push(cur);cur=null}else{out.push({nome:"Canal",url:line,grupo:"",logo:""})}
-    }}
-  return out.filter(c=>c.url);
-}
+    if(line.startsWith("#EXTINF")){const comma=line.indexOf(",");const attrs=comma>-1?line.slice(0,comma):line;const name=comma>-1?line.slice(comma+1).trim():"";
+      cur={nome:name||"Canal",grupo:attr(attrs,"group-title"),logo:attr(attrs,"tvg-logo")};}
+    else if(!line.startsWith("#")){if(cur){cur.url=line;out.push(cur);cur=null}else{out.push({nome:"Canal",url:line,grupo:"",logo:""})}}}
+  return out.filter(c=>c.url);}
 function attr(s,key){const m=s.match(new RegExp(key+'="([^"]*)"'));return m?m[1]:""}
 
-/* ------- export ------- */
-$("btnExport").onclick=()=>{
-  if(!canais.length){toast("Nada para exportar");return}
-  const choice=(prompt("Exportar como? m3u ou json","m3u")||"").toLowerCase();
-  if(!choice)return;
-  if(choice.includes("json")){download("canais.json",JSON.stringify(canais,null,2))}
-  else{let m="#EXTM3U\n";for(const c of canais.filter(x=>x.ativo)){m+=`#EXTINF:-1 tvg-logo="${c.logo_url||""}" group-title="${c.grupo||""}",${c.nome}\n${c.stream_url}\n`}download("canais.m3u",m)}
-  toast("Arquivo gerado");
-};
+/* export */
+$("btnExport").onclick=()=>{if(!canais.length){toast("Nada para exportar");return}
+  const choice=(prompt("Exportar como? m3u ou json","m3u")||"").toLowerCase();if(!choice)return;
+  if(choice.includes("json"))download("canais.json",JSON.stringify(canais,null,2));
+  else{let m="#EXTM3U\n";for(const c of canais.filter(x=>x.ativo))m+=`#EXTINF:-1 tvg-logo="${c.logo_url||""}" group-title="${c.grupo||""}",${c.nome}\n${c.stream_url}\n`;download("canais.m3u",m)}
+  toast("Arquivo gerado");};
 function download(name,content){const b=new Blob([content],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 
-/* ------- player ------- */
+/* player */
 let hls=null;
 function openPlayerUrl(nome,url){
   $("playerTitle").textContent=nome;$("playerUrl").textContent=url;$("playerMeta").innerHTML="";
@@ -431,22 +556,20 @@ function openPlayerUrl(nome,url){
   const video=$("video");show("mPlayer");cleanupHls();
   const ok=()=>{st.classList.add("hide");$("playerMeta").innerHTML="<b>Conectado.</b> Se aparece imagem, toca na launcher.";};
   const err=m=>{st.className="player-status";st.innerHTML=`<div style="color:var(--danger)">⚠ ${esc(m)}</div><div class="player-meta">Verifique token/headers/CORS.</div>`;};
-  if(window.Hls&&Hls.isSupported()){
-    hls=new Hls({lowLatencyMode:true});hls.loadSource(url);hls.attachMedia(video);
+  if(window.Hls&&Hls.isSupported()){hls=new Hls({lowLatencyMode:true});hls.loadSource(url);hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED,()=>{ok();video.play().catch(()=>{})});
-    hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)err((d.details||"erro")+" · "+(d.type||""))});
-  }else if(video.canPlayType("application/vnd.apple.mpegurl")){
-    video.src=url;video.addEventListener("loadedmetadata",()=>{ok();video.play().catch(()=>{})},{once:true});
-    video.addEventListener("error",()=>err("não carregou (HLS nativo)"),{once:true});
-  }else{err("hls.js não carregou. Abra este arquivo localmente.")}
+    hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)err((d.details||"erro")+" · "+(d.type||""))});}
+  else if(video.canPlayType("application/vnd.apple.mpegurl")){video.src=url;video.play().catch(()=>{});
+    video.addEventListener("loadedmetadata",ok,{once:true});video.addEventListener("error",()=>err("não carregou"),{once:true});}
+  else err("player HLS indisponível");
 }
-function cleanupHls(){if(hls){try{hls.destroy()}catch(e){}hls=null}const v=$("video");v.pause();v.removeAttribute("src");v.load()}
+function cleanupHls(){if(hls){try{hls.destroy()}catch(e){}hls=null}const v=$("video");v.pause();v.removeAttribute("src");try{v.load()}catch(e){}}
 
-/* ------- modal wiring ------- */
+/* modais */
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=e=>hide(e.target.closest(".modal").id));
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)hide(m.id)}));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal.on").forEach(m=>hide(m.id))});
-$("search").oninput=render;
+$("search").oninput=renderCanais;
 </script>
 </body>
 </html>
