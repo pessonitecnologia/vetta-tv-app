@@ -293,16 +293,27 @@ function openChannel(idx){
   const video=$("video");cleanupHls();
   const ok=()=>{st.classList.add("hide")};
   const fail=m=>{st.className="p-status";st.innerHTML=`<div style="max-width:40ch"><div style="font-size:30px">📡</div><div style="margin-top:10px">Canal indisponível</div><div style="color:var(--faint);font-size:13px;margin-top:6px">${esc(m)}</div></div>`};
+  play(c.stream_url, false, ok, fail, video);
+}
+// PROXY: resolve CORS automaticamente. Se o canal falhar por rede/CORS, reencaminha pelo tv-proxy.
+const PROXY="https://ncwzkksjwjiikrkfuhqw.supabase.co/functions/v1/tv-proxy";
+function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function play(rawUrl, viaProxy, ok, fail, video){
+  const src=viaProxy?`${PROXY}?u=${b64url(rawUrl)}`:rawUrl;
+  cleanupHls();
+  const corsish=["manifestLoadError","levelLoadError","manifestParsingError","fragLoadError","keyLoadError","levelLoadTimeOut","fragLoadTimeOut"];
   if(window.Hls&&Hls.isSupported()){
     hls=new Hls({lowLatencyMode:true,liveSyncDurationCount:3});
-    hls.loadSource(c.stream_url);hls.attachMedia(video);
+    hls.loadSource(src);hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED,()=>{ok();video.play().catch(()=>{})});
-    hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)fail(d.details||"erro de stream")});
+    hls.on(Hls.Events.ERROR,(e,d)=>{if(!d.fatal)return;
+      if(!viaProxy&&(corsish.includes(d.details)||d.type===Hls.ErrorTypes.NETWORK_ERROR)){play(rawUrl,true,ok,fail,video)}
+      else fail(d.details||"erro de stream");});
   }else if(video.canPlayType("application/vnd.apple.mpegurl")){
-    video.src=c.stream_url;video.play().catch(()=>{});
+    video.src=src;video.play().catch(()=>{});
     video.addEventListener("loadedmetadata",ok,{once:true});
-    video.addEventListener("error",()=>fail("não foi possível carregar"),{once:true});
-  }else{fail("player HLS indisponível neste dispositivo")}
+    video.addEventListener("error",()=>{if(!viaProxy)play(rawUrl,true,ok,fail,video);else fail("não foi possível carregar")},{once:true});
+  }else fail("player HLS indisponível neste dispositivo");
 }
 function zap(dir){openChannel(curIdx+dir)}
 function tuneByNumber(n){
