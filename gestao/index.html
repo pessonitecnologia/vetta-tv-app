@@ -268,6 +268,27 @@
   <div class="card-foot"><button class="btn ghost" data-close>Fechar</button></div>
 </div></div>
 
+<!-- serviços do hotel -->
+<div class="modal" id="mServicos"><div class="card wide">
+  <div class="card-head"><h2 id="servicosTitle">Serviços do hotel</h2><button class="x" data-close>✕</button></div>
+  <div class="card-body">
+    <div class="hint" style="margin-bottom:14px">O que aparece em “Serviços do hotel” na launcher. O <b>conteúdo</b> é o texto mostrado ao hóspede quando ele abre (ex.: senha do Wi-Fi, cardápio, horários).</div>
+    <div class="box-list" id="svList"></div>
+    <div class="grid2">
+      <div class="field"><label>Ícone (emoji)</label><input id="svIcone" placeholder="📶" maxlength="4"></div>
+      <div class="field"><label>Título *</label><input id="svTitulo" placeholder="Ex.: Wi-Fi"></div>
+    </div>
+    <div class="field"><label>Subtítulo</label><input id="svSub" placeholder="Ex.: Senha e conexão"></div>
+    <div class="field"><label>Conteúdo (mostrado ao abrir)</label><textarea id="svConteudo" style="min-height:90px" placeholder="Rede: CR_Hotel&#10;Senha: bemvindo2026"></textarea></div>
+    <input type="hidden" id="svId">
+    <div style="display:flex;gap:10px">
+      <button class="btn primary" id="btnSaveServico">Salvar serviço</button>
+      <button class="btn ghost" id="btnClearServico">Limpar</button>
+    </div>
+  </div>
+  <div class="card-foot"><button class="btn ghost" data-close>Fechar</button></div>
+</div></div>
+
 <!-- import -->
 <div class="modal" id="mImport"><div class="card wide">
   <div class="card-head"><h2>Importar lista M3U</h2><button class="x" data-close>✕</button></div>
@@ -372,6 +393,7 @@ function renderHotels(){
   host.innerHTML=`<table><thead><tr><th></th><th>Hotel</th><th>Cidade</th><th>Cor</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead><tbody>${hotels.map(hotelRow).join("")}</tbody></table>`;
   host.querySelectorAll("[data-eh]").forEach(b=>b.onclick=()=>openHotelForm(b.dataset.eh));
   host.querySelectorAll("[data-bx]").forEach(b=>b.onclick=()=>openBoxes(b.dataset.bx));
+  host.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>openServicos(b.dataset.sv));
   host.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{currentHotel=b.dataset.ch;$("hotelSelect").value=currentHotel;showView("canais")});
   host.querySelectorAll("[data-dh]").forEach(b=>b.onclick=()=>delHotel(b.dataset.dh));
 }
@@ -386,6 +408,7 @@ function hotelRow(h){
     <td><span class="status-pill ${h.ativo?"on":"off"}"><i></i>${h.ativo?"Ativo":"Inativo"}</span></td>
     <td><div class="row-actions">
       <button class="txt-btn" data-bx="${h.id}">📺 Boxes</button>
+      <button class="txt-btn" data-sv="${h.id}">🛎 Serviços</button>
       <button class="txt-btn" data-ch="${h.id}">Canais</button>
       <button class="icon-btn" data-eh="${h.id}" title="Editar">✏</button>
       <button class="icon-btn danger" data-dh="${h.id}" title="Excluir">🗑</button>
@@ -458,6 +481,40 @@ $("btnAddBox").onclick=async()=>{
   const {error}=await sb.from("dispositivo").insert({hotel_id:boxesHotelId,quarto,nome:$("bxNome").value.trim()||null});
   if(error){toast("Erro: "+error.message);return}
   $("bxQuarto").value="";$("bxNome").value="";await renderBoxes();toast("Box criado");
+};
+
+/* ===== Serviços do hotel ===== */
+let svcHotelId=null;
+async function openServicos(hotelId){
+  svcHotelId=hotelId;const h=hotels.find(x=>x.id===hotelId);
+  $("servicosTitle").textContent="Serviços · "+(h?h.nome:"");
+  clearServico();show("mServicos");await renderServicos();
+}
+function clearServico(){$("svId").value="";$("svIcone").value="";$("svTitulo").value="";$("svSub").value="";$("svConteudo").value="";$("btnSaveServico").textContent="Salvar serviço"}
+async function renderServicos(){
+  const {data,error}=await sb.from("servico").select("*").eq("hotel_id",svcHotelId).order("ordem");
+  const host=$("svList");
+  if(error){host.innerHTML=`<div class="hint">Erro ao carregar.</div>`;return}
+  if(!data.length){host.innerHTML=`<div class="hint">Nenhum serviço. Adicione abaixo (ex.: Wi-Fi, Room Service, Café).</div>`;return}
+  host.innerHTML=data.map(s=>`<div class="box-item"><div class="box-top">
+      <div><span class="box-quarto">${esc(s.icone||"•")} ${esc(s.titulo)}</span>${s.subtitulo?` <span class="cgrp">· ${esc(s.subtitulo)}</span>`:""}${s.conteudo?`<div class="seen">${esc(s.conteudo).slice(0,80)}${s.conteudo.length>80?"…":""}</div>`:""}</div>
+      <div style="display:flex;gap:6px"><button class="icon-btn" data-esv="${s.id}" title="Editar">✏</button><button class="icon-btn danger" data-dsv="${s.id}" title="Excluir">🗑</button></div>
+    </div></div>`).join("");
+  host.querySelectorAll("[data-esv]").forEach(b=>b.onclick=()=>{const s=data.find(x=>x.id===b.dataset.esv);
+    $("svId").value=s.id;$("svIcone").value=s.icone||"";$("svTitulo").value=s.titulo;$("svSub").value=s.subtitulo||"";$("svConteudo").value=s.conteudo||"";$("btnSaveServico").textContent="Atualizar serviço"});
+  host.querySelectorAll("[data-dsv]").forEach(b=>b.onclick=async()=>{if(!confirm("Excluir este serviço?"))return;await sb.from("servico").delete().eq("id",b.dataset.dsv);renderServicos();toast("Serviço excluído")});
+}
+$("btnClearServico").onclick=clearServico;
+$("btnSaveServico").onclick=async()=>{
+  const titulo=$("svTitulo").value.trim();
+  if(!titulo){toast("Informe o título");return}
+  const rec={hotel_id:svcHotelId,icone:$("svIcone").value.trim()||null,titulo,subtitulo:$("svSub").value.trim()||null,conteudo:$("svConteudo").value.trim()||null};
+  const id=$("svId").value;let res;
+  if(id)res=await sb.from("servico").update(rec).eq("id",id);
+  else{const {data}=await sb.from("servico").select("ordem").eq("hotel_id",svcHotelId).order("ordem",{ascending:false}).limit(1);
+    rec.ordem=((data&&data[0]&&data[0].ordem)||0)+1;res=await sb.from("servico").insert(rec)}
+  if(res.error){toast("Erro: "+res.error.message);return}
+  clearServico();await renderServicos();toast(id?"Serviço atualizado":"Serviço adicionado");
 };
 
 /* ===== Canais ===== */

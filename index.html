@@ -118,6 +118,20 @@
   .tuning{position:absolute;top:34px;right:clamp(26px,4vw,60px);font-size:clamp(40px,6vw,80px);font-weight:800;
     color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.7);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .15s}
   .tuning.on{opacity:1}
+
+  /* ---------- Overlay de serviço ---------- */
+  #servico{position:fixed;inset:0;z-index:75;display:none;place-items:center;padding:40px;
+    background:radial-gradient(120% 100% at 50% 0%, rgba(28,41,66,.9), rgba(10,14,20,.96))}
+  #servico.on{display:grid}
+  .sv-card{max-width:680px;width:100%;text-align:center;background:linear-gradient(160deg,#1a2740,#12192a);
+    border:1px solid var(--line);border-radius:22px;padding:44px 48px;box-shadow:0 40px 90px rgba(0,0,0,.6)}
+  .sv-ic{font-size:64px;line-height:1;margin-bottom:10px}
+  .sv-card h2{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:clamp(28px,3.4vw,42px);margin:6px 0 4px}
+  .sv-sub{color:var(--brass);font-size:15px;letter-spacing:1px;text-transform:uppercase;margin-bottom:22px}
+  .sv-conteudo{color:var(--ink);font-size:clamp(16px,1.8vw,22px);line-height:1.6;white-space:pre-wrap;
+    background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:22px 26px;min-height:60px}
+  .sv-conteudo:empty{display:none}
+  .sv-hint{color:var(--faint);font-size:14px;margin-top:24px}
 </style>
 </head>
 <body>
@@ -176,6 +190,17 @@
   </div>
 </div>
 
+<!-- Overlay de serviço do hotel -->
+<div id="servico">
+  <div class="sv-card">
+    <div class="sv-ic" id="svIc">🛎</div>
+    <h2 id="svTitulo">—</h2>
+    <div class="sv-sub" id="svSub"></div>
+    <div class="sv-conteudo" id="svConteudo"></div>
+    <div class="sv-hint"><b>Voltar</b> fecha</div>
+  </div>
+</div>
+
 <script>
 /* ================= Config ================= */
 const EDGE="https://ncwzkksjwjiikrkfuhqw.supabase.co/functions/v1/tv-canais";
@@ -193,7 +218,7 @@ const SERVICES=[
 const PAL=[["#3b4d7a","#1f2942"],["#2f5f7a","#17303f"],["#2f6d5b","#173229"],["#3a4a7d","#1f2540"],["#4a3f7d","#241f40"],["#2f5a6d","#173029"],["#345a8a","#1a2c44"],["#40406d","#1f1f32"],["#2f6d55","#173026"]];
 const $=id=>document.getElementById(id);
 
-let canais=[], hotel=null;
+let canais=[], hotel=null, servicos=[];
 let nav={rails:[], r:0, c:0};       // navegação D-pad na home
 let curIdx=-1;                       // canal atual no player
 let hls=null, infoTimer=null, tuneBuf="", tuneTimer=null;
@@ -206,7 +231,7 @@ async function loadGrade(){
     const r=await fetch(url,{cache:"no-store"});
     const data=await r.json();
     if(!r.ok||data.error) return showCurtain("error", data.error||`Erro ${r.status}`);
-    hotel=data.hotel; canais=data.canais||[];
+    hotel=data.hotel; canais=data.canais||[]; servicos=data.servicos||[];
     renderHome();
     hideCurtain();
   }catch(e){ showCurtain("error","Sem conexão com o servidor."); }
@@ -254,13 +279,16 @@ function renderHome(){
     sec.appendChild(track);rails.appendChild(sec);railEls.push(Array.from(track.children));
   });
 
-  // trilho de serviços
+  // trilho de serviços (do banco; se vazio, usa os padrões)
+  const svcData = servicos.length
+    ? servicos.map(s=>({ic:s.icone||"•",t:s.titulo,s:s.subtitulo||"",conteudo:s.conteudo||""}))
+    : SERVICES.map(s=>({...s,conteudo:""}));
   const svc=document.createElement("section");svc.className="rail";
   svc.innerHTML=`<div class="rail-head"><h2>Serviços do hotel</h2></div>`;
   const st=document.createElement("div");st.className="track track--svc";
-  SERVICES.forEach(s=>{const el=document.createElement("button");el.className="tile";
-    el.innerHTML=`<div class="svc-inner"><div class="svc-ic">${s.ic}</div><div><div class="svc-t">${s.t}</div><div class="svc-s">${s.s}</div></div></div>`;
-    el.onclick=()=>{}; st.appendChild(el)});
+  svcData.forEach(s=>{const el=document.createElement("button");el.className="tile";
+    el.innerHTML=`<div class="svc-inner"><div class="svc-ic">${esc(s.ic)}</div><div><div class="svc-t">${esc(s.t)}</div><div class="svc-s">${esc(s.s)}</div></div></div>`;
+    el.onclick=()=>openServico(s); st.appendChild(el)});
   svc.appendChild(st);rails.appendChild(svc);
 
   // modelo de navegação: [ [heroCta], ...canaisPorTrilho, [servicos] ]
@@ -321,11 +349,24 @@ function tuneByNumber(n){
   if(found>=0)openChannel(found);
 }
 function closePlayer(){$("player").classList.remove("on");cleanupHls();focusCell()}
+function openServico(s){
+  $("svIc").textContent=s.ic||"•";
+  $("svTitulo").textContent=s.t||"";
+  $("svSub").textContent=s.s||"";
+  $("svConteudo").textContent=s.conteudo||"";
+  $("servico").classList.add("on");
+}
+function closeServico(){$("servico").classList.remove("on");focusCell()}
 function cleanupHls(){if(hls){try{hls.destroy()}catch(e){}hls=null}const v=$("video");v.pause();v.removeAttribute("src");try{v.load()}catch(e){}}
 function showInfo(){$("infobar").classList.remove("hide");clearTimeout(infoTimer);infoTimer=setTimeout(()=>$("infobar").classList.add("hide"),4500)}
 
 /* ================= Teclado / controle ================= */
 document.addEventListener("keydown",e=>{
+  // overlay de serviço aberto: qualquer Voltar/OK fecha
+  if($("servico").classList.contains("on")){
+    if(["Escape","Backspace","GoBack","BrowserBack","Enter"].includes(e.key)){closeServico();e.preventDefault()}
+    return;
+  }
   const playing=$("player").classList.contains("on");
   // dígitos sintonizam (só no player)
   if(playing && /^[0-9]$/.test(e.key)){
